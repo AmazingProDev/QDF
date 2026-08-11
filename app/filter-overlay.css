@@ -2,3 +2,5 @@
   flex-wrap: wrap;
   overflow: visible;
 }
+
+.effectiveness-bar { cursor: pointer; }
