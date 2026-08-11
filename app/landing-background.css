@@ -1,0 +1,24 @@
+.upload-page {
+  background:
+    linear-gradient(100deg, rgba(34, 7, 10, .72), rgba(91, 16, 20, .42)),
+    url("/maroc-telecom.png") center / cover fixed;
+}
+
+.landing-header {
+  background: rgba(24, 7, 10, .18);
+}
+
+.brand { color: #fff; }
+.brand small { color: rgba(255, 255, 255, .72); }
+.brand-mark { background: rgba(255, 255, 255, .17); border: 1px solid rgba(255, 255, 255, .35); }
+.upload-hero .eyebrow { color: #ffd5c9; }
+.upload-hero h1 { color: #fff; text-shadow: 0 2px 20px rgba(0, 0, 0, .28); }
+.upload-hero h1 em { color: #ffd1c5; }
+.upload-hero > p { color: rgba(255, 255, 255, .9); }
+.upload-workspace { background: rgba(255, 255, 255, .96); }
+.method-note { background: rgba(255, 255, 255, .93); padding-top: 20px; }
+
+@media (max-width: 700px) {
+  .upload-page { background-attachment: scroll; background-position: 58% center; }
+  .landing-header { margin: 0; }
+}
