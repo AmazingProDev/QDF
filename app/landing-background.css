@@ -4,6 +4,24 @@
     url("/maroc-telecom.png") center / cover fixed;
 }
 
+body {
+  background:
+    linear-gradient(100deg, rgba(34, 7, 10, .72), rgba(91, 16, 20, .42)),
+    url("/maroc-telecom.png") center / cover fixed;
+}
+
+.app-shell { min-height: 100vh; }
+.dashboard-header {
+  margin-left: -12px;
+  margin-right: -12px;
+  padding: 14px 12px;
+  background: rgba(38, 8, 12, .54);
+  backdrop-filter: blur(3px);
+}
+.dashboard-header h1 { color: #fff; }
+.dashboard-header p { color: rgba(255, 255, 255, .82); }
+.dashboard-header .eyebrow { color: #ffd5c9; }
+
 .landing-header {
   background: rgba(24, 7, 10, .18);
 }
@@ -21,4 +39,5 @@
 @media (max-width: 700px) {
   .upload-page { background-attachment: scroll; background-position: 58% center; }
   .landing-header { margin: 0; }
+  .dashboard-header { margin-left: 0; margin-right: 0; }
 }
