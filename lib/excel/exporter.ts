@@ -1,17 +1,32 @@
 import { qualificationResponsibility, qualificationStatus } from "@/lib/analysis/qualification";
-import { type SectorImpactResult, type SectorSnapshot, type Settings } from "@/lib/types/telecom";
+import { BANDS, type Band, type SectorImpactResult, type SectorSnapshot, type Settings } from "@/lib/types/telecom";
 
-const impactHeaders = [
-  { label: "TRD Débit", key: "trdThroughput", percent: true },
-  { label: "TRD PRB", key: "trdPrb", percent: true },
-  { label: "IEA Action", key: "iea", percent: true },
-  { label: "Efficacité action", key: "actionEffectiveness" },
-  { label: "Statut dégradation", key: "degradationStatus" },
-  { label: "Conclusion impact", key: "conclusion" },
-  { label: "Confiance mesure", key: "confidence" },
-  { label: "Évolution bandes", key: "bandMigration" },
-] as const;
-type ImpactKey = (typeof impactHeaders)[number]["key"];
+type ImpactHeader = { label: string; value: (result: SectorImpactResult) => string | number | undefined; numberFormat?: string; width?: number };
+const bandHeaders = (band: Band): ImpactHeader[] => [
+  { label: `${band} DL Avant`, value: (result) => result.bandResults[band].throughputBefore, numberFormat: "0.000000" },
+  { label: `${band} DL Après`, value: (result) => result.bandResults[band].throughputAfter, numberFormat: "0.000000" },
+  { label: `Gain DL ${band} %`, value: (result) => result.bandResults[band].throughputGain, numberFormat: "0.0%" },
+  { label: `${band} PRB Avant`, value: (result) => result.bandResults[band].prbBefore, numberFormat: "0.000000" },
+  { label: `${band} PRB Après`, value: (result) => result.bandResults[band].prbAfter, numberFormat: "0.000000" },
+  { label: `Soulagement PRB ${band} pts`, value: (result) => result.bandResults[band].prbRelief, numberFormat: "0.000000" },
+];
+const impactHeaders: ImpactHeader[] = [
+  { label: "Dégradation initiale", value: (result) => result.before.degradedBands.join("+") },
+  { label: "Dégradation après", value: (result) => result.after.degradedBands.join("+") },
+  { label: "Bandes chargées initiales", value: (result) => result.before.chargedBands.join("+") },
+  { label: "Gap DL Avant", value: (result) => result.gapDlBefore, numberFormat: "0.000000" },
+  { label: "Gap DL Après", value: (result) => result.gapDlAfter, numberFormat: "0.000000" },
+  { label: "TRD Débit", value: (result) => result.trdThroughput, numberFormat: "0.0%" },
+  { label: "Gap PRB Avant", value: (result) => result.gapPrbBefore, numberFormat: "0.000000" },
+  { label: "Gap PRB Après", value: (result) => result.gapPrbAfter, numberFormat: "0.000000" },
+  { label: "TRD PRB", value: (result) => result.trdPrb, numberFormat: "0.0%" },
+  { label: "IEA Action", value: (result) => result.iea, numberFormat: "0.0%" },
+  { label: "Statut Action", value: (result) => result.actionEffectiveness, width: 28 },
+  { label: "Statut Dégradation", value: (result) => result.degradationStatus, width: 24 },
+  { label: "Conclusion", value: (result) => result.conclusion, width: 44 },
+  { label: "Evolution bande dégradée", value: (result) => result.bandMigration, width: 28 },
+  ...BANDS.flatMap(bandHeaders),
+];
 type SummaryRow = { responsibility: string; actions: number; normalized: number; compromised: number; completed: number; persistent: number };
 
 const name = (date: Date) => `Qualification_finale_avec_impact_${date.toISOString().slice(0, 10).replaceAll("-", "")}.xlsx`;
@@ -43,16 +58,16 @@ function applyImpactColumns(sheet: import("exceljs").Worksheet, headerRow: numbe
     cell.font = whiteBold;
     cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
     cell.border = border;
-    sheet.getColumn(firstColumn + index).width = [14, 14, 14, 21, 22, 42, 30, 26][index];
+    sheet.getColumn(firstColumn + index).width = header.width || (header.numberFormat ? 16 : 22);
   });
   for (let rowNumber = headerRow + 1; rowNumber <= sheet.rowCount; rowNumber++) {
     const row = sheet.getRow(rowNumber); const sector = cellText(row.getCell(sectorColumn).value).replace(/\s+/g, " ").trim(); const result = bySector.get(sector);
     impactHeaders.forEach((header, index) => {
-      const cell = row.getCell(firstColumn + index); const value = result?.[header.key as ImpactKey];
-      cell.value = value === undefined ? null : value as string | number | null;
+      const cell = row.getCell(firstColumn + index); const value = result ? header.value(result) : undefined;
+      cell.value = value === undefined ? null : value;
       cell.alignment = { vertical: "top", wrapText: true };
       cell.border = border;
-      if ("percent" in header && header.percent) cell.numFmt = "0.0%";
+      if (header.numberFormat) cell.numFmt = header.numberFormat;
     });
   }
   sheet.autoFilter = { from: { row: headerRow, column: 1 }, to: { row: sheet.rowCount, column: firstColumn + impactHeaders.length - 1 } };
@@ -83,7 +98,7 @@ function addSummary(workbook: import("exceljs").Workbook, before: SectorSnapshot
 
 export async function buildExportWorkbook(results: SectorImpactResult[], settings: Settings, source: ArrayBuffer, beforeRecords: SectorSnapshot[], afterRecords: SectorSnapshot[]) {
   const ExcelJS = await import("exceljs"); const workbook = new ExcelJS.Workbook(); await workbook.xlsx.load(source); workbook.creator = "EMA Solution"; workbook.modified = new Date();
-  const { sheet, headerRow, sectorColumn } = findAnalyse(workbook); applyImpactColumns(sheet, headerRow, sectorColumn, results); addSummary(workbook, beforeRecords, afterRecords, settings);
+  const { sheet, headerRow, sectorColumn } = findAnalyse(workbook); workbook.worksheets.filter((item) => item.id !== sheet.id).forEach((item) => workbook.removeWorksheet(item.id)); applyImpactColumns(sheet, headerRow, sectorColumn, results); addSummary(workbook, beforeRecords, afterRecords, settings);
   return workbook.xlsx.writeBuffer();
 }
 
