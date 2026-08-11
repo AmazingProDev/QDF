@@ -1,0 +1,8 @@
+node_modules/
+.next/
+*.xlsx
+*.xlsm
+*.xls
+*.csv
+*.log
+.DS_Store
