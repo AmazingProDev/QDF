@@ -1,0 +1,18 @@
+.qualification-section { margin-top: 13px; padding: 20px; border: 1px solid #dfe7ef; background: #fff; }
+.qualification-section .section-heading p { margin: 0; color: #718397; font-size: 11px; }
+.qualification-table-wrap { overflow-x: auto; margin-top: 16px; }
+.qualification-table { width: 100%; min-width: 730px; border-collapse: collapse; font-size: 12px; }
+.qualification-table th, .qualification-table td { padding: 8px 10px; border: 1px solid #25384b; text-align: center; }
+.qualification-table th:first-child, .qualification-table td:first-child { text-align: left; }
+.qualification-table th { color: #101820; background: #f1f3f5; font-weight: 800; }
+.qualification-table th:first-child, .qualification-table .total-row td:first-child { color: #fff; background: #c90000; }
+.qualification-table .normalized-head, .qualification-table .normalized-cell { background: #92d050; }
+.qualification-table .compromised-head, .qualification-table .compromised-cell { background: #d9efd0; }
+.qualification-table .completed-head, .qualification-table .completed-cell, .qualification-table .persistent-head, .qualification-table .persistent-cell { background: #d9d9d9; }
+.qualification-table .new-degradation-head, .qualification-table .new-degradation-cell { background: #f5c2a3; }
+.qualification-table .production-head { color: #fff; background: #c90000; }
+.qualification-table .total-row { font-weight: 800; }
+.qualification-table .good-number { color: #00a651; font-weight: 800; }
+.qualification-table .bad-number { color: #e11d26; font-weight: 800; }
+.qualification-table-wrap.compact { width: min(720px, 100%); }
+.qualification-subtitle { margin: 32px 0 0; color: #244e7c; font-size: 16px; text-decoration: underline; }
