@@ -2,6 +2,9 @@
 .qualification-section .section-heading p { margin: 0; color: #718397; font-size: 11px; }
 .qualification-scope { margin: 12px 0 0; color: #536b83; font-size: 12px; }
 .qualification-scope span { color: #c94b4b; font-weight: 800; }
+.summary-filter-hint { margin: 7px 0 -5px; color: #63778b; font-size: 11px; }
+.summary-filter-number { width: 100%; min-height: 18px; padding: 0; color: inherit; font-weight: inherit; background: transparent; }
+.summary-filter-number:hover { color: #155e9b; text-decoration: underline; }
 .qualification-table-wrap { overflow-x: auto; margin-top: 16px; }
 .qualification-table { width: 100%; min-width: 730px; border-collapse: collapse; font-size: 12px; }
 .qualification-table th, .qualification-table td { padding: 8px 10px; border: 1px solid #25384b; text-align: center; }
