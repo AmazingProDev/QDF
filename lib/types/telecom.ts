@@ -20,6 +20,6 @@ export interface SectorImpactResult {
 }
 export type ActionEffectiveness = "Très efficace" | "Efficace" | "Amélioration partielle" | "Impact faible / non significatif" | "Régression" | "Non mesurable";
 export interface Settings { dlThresholds: Record<Band, number>; prbThreshold: number; throughputWeight: number; prbWeight: number; veryEffective: number; effective: number; partial: number; regression: number }
-export interface ParseResult { records: Map<string, SectorSnapshot>; duplicates: string[]; detectedBands: Record<Band, { throughput: boolean; prb: boolean }>; rowCount: number; sheetName: string }
+export interface ParseResult { records: Map<string, SectorSnapshot>; allRecords: SectorSnapshot[]; duplicates: string[]; detectedBands: Record<Band, { throughput: boolean; prb: boolean }>; rowCount: number; sheetName: string }
 export interface ValidationSummary { beforeRows: number; afterRows: number; common: number; onlyBefore: number; onlyAfter: number; beforeDuplicates: number; afterDuplicates: number; bands: Record<Band, boolean> }
 export const defaultSettings: Settings = { dlThresholds: { L1800: 10, L2100: 5, L2600: 10, L800: 5 }, prbThreshold: 70, throughputWeight: .6, prbWeight: .4, veryEffective: .8, effective: .5, partial: .2, regression: -.2 };
