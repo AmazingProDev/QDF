@@ -4,3 +4,4 @@
 }
 
 .effectiveness-bar { cursor: pointer; }
+.chart-empty { display: grid; height: 260px; place-items: center; color: #718397; font-size: 12px; }
