@@ -1,0 +1,16 @@
+.methodology-drawer { position: fixed; z-index: 11; top: 0; right: 0; width: min(620px, 96vw); height: 100vh; overflow: auto; background: #fff; box-shadow: -12px 0 32px rgba(21, 47, 72, .18); }
+.methodology-body { padding: 20px 23px 36px; color: #4d6176; font-size: 13px; line-height: 1.55; }
+.methodology-intro { margin: 0; padding: 12px 14px; color: #244e7c; background: #eef5fb; border-left: 3px solid #3371ab; }
+.methodology-body section { margin-top: 24px; }
+.methodology-body h3 { margin: 0 0 8px; color: #224f7c; font-size: 14px; }
+.methodology-body p { margin: 7px 0; }
+.formula-box { display: grid; grid-template-columns: minmax(130px, .8fr) minmax(0, 1.7fr); gap: 5px 14px; padding: 12px; color: #263e56; border: 1px solid #d8e3ed; background: #f8fafc; }
+.formula-box b { color: #215486; }
+.formula-box.one-line { grid-template-columns: 100px 1fr; }
+.thresholds { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 9px; }
+.thresholds span { padding: 4px 8px; color: #42617f; font-size: 11px; border-radius: 3px; background: #eef4f8; }
+.methodology-table { width: 100%; border-collapse: collapse; }
+.methodology-table td { padding: 7px 9px; border: 1px solid #dbe4ec; }
+.methodology-table td:first-child { color: #244e7c; font-weight: 700; background: #f4f7fa; }
+.methodology-note { padding: 10px 12px; color: #765d27; background: #fff7e7; }
+.landing-actions{display:flex;gap:8px}
