@@ -14,9 +14,11 @@
 
 .multi-select-button svg { position: absolute; top: 8px; right: 7px; pointer-events: none; color: #7e91a4; }
 .multi-select-menu { position: absolute; z-index: 5; top: 100%; left: 0; width: max-content; min-width: 195px; max-width: 290px; max-height: 270px; margin-top: 4px; padding: 6px; overflow: auto; border: 1px solid #d2dde8; background: #fff; box-shadow: 0 10px 22px rgba(31, 62, 92, .16); }
+.contains-input { width: 100%; height: 29px; margin-bottom: 6px; padding: 0 8px; color: #314a65; font-size: 11px; border: 1px solid #d7e0e9; outline-color: #235c9e; }
 .multi-select-menu label { display: flex; gap: 7px; align-items: center; padding: 6px 7px; color: #334c66; font-size: 11px; cursor: pointer; }
 .multi-select-menu label:hover { background: #f2f6fa; }
 .multi-select-menu input { accent-color: #235c9e; }
 .multi-select-menu label span { color: #334c66; font-size: 11px; font-weight: 400; letter-spacing: 0; }
 .multi-select-actions { display: flex; justify-content: space-between; padding: 3px 7px 7px; border-bottom: 1px solid #e7edf3; }
 .multi-select-actions button { padding: 0; color: #2d6ca7; font-size: 10px; background: transparent; }
+.no-filter-option { margin: 9px 7px; color: #7a8c9e; font-size: 11px; }

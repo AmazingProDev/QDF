@@ -3,7 +3,7 @@ export type Band = (typeof BANDS)[number];
 
 export interface BandKpi { throughput?: number; prb?: number; availability?: number; ta?: number }
 export interface SectorSnapshot {
-  sector: string; originalSector: string; hetsite?: string; dr?: string; plaque?: string; vendor?: string;
+  sector: string; originalSector: string; situation?: string; hetsite?: string; dr?: string; plaque?: string; vendor?: string;
   responsibility?: string; action?: string; qualif?: string; degradedBands: Band[]; chargedBands: Band[];
   prodOptim?: Date; prodMaintenance?: Date; prodDeployment?: Date; prodEngineering?: Date;
   bands: Record<Band, BandKpi>;
