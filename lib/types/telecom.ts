@@ -18,6 +18,7 @@ export interface SectorImpactResult {
   gapDlBefore?: number; gapDlAfter?: number; gapPrbBefore?: number; gapPrbAfter?: number;
   actionEffectiveness: ActionEffectiveness; degradationStatus: string; conclusion: string; confidence: string; bandMigration: string;
   baselineSource?: "Référence Ookla" | "Fichier BEFORE";
+  afterKpiWarning?: string;
 }
 export type ActionEffectiveness = "Très efficace" | "Efficace" | "Amélioration partielle" | "Impact faible / non significatif" | "Régression" | "Non mesurable";
 export interface Settings { dlThresholds: Record<Band, number>; prbThreshold: number; throughputWeight: number; prbWeight: number; veryEffective: number; effective: number; partial: number; regression: number }
