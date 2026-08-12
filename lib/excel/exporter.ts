@@ -1,4 +1,5 @@
 import { qualificationResponsibility, qualificationStatus } from "@/lib/analysis/qualification";
+import { calculateEvolutionContribution } from "@/lib/analysis/evolution";
 import { BANDS, type Band, type SectorImpactResult, type SectorSnapshot, type Settings } from "@/lib/types/telecom";
 
 type ImpactHeader = { label: string; value: (result: SectorImpactResult) => string | number | undefined; numberFormat?: string; width?: number };
@@ -9,6 +10,11 @@ const bandHeaders = (band: Band): ImpactHeader[] => [
   { label: `${band} PRB Avant`, value: (result) => result.bandResults[band].prbBefore, numberFormat: "0.000000" },
   { label: `${band} PRB Après`, value: (result) => result.bandResults[band].prbAfter, numberFormat: "0.000000" },
   { label: `Soulagement PRB ${band} pts`, value: (result) => result.bandResults[band].prbRelief, numberFormat: "0.000000" },
+  { label: `Score DL ${band} %`, value: (result) => result.bandResults[band].throughputEvolution, numberFormat: "0.0%" },
+  { label: `Score PRB ${band} %`, value: (result) => result.bandResults[band].prbEvolution, numberFormat: "0.0%" },
+  { label: `IEA-E ${band} %`, value: (result) => result.bandResults[band].ieaEvolution, numberFormat: "0.0%" },
+  { label: `Poids trafic IEA-E ${band} %`, value: (result) => result.bandResults[band].evolutionTrafficWeight, numberFormat: "0.0%" },
+  { label: `Couverture IEA-E ${band}`, value: (result) => result.bandResults[band].evolutionCoverage, width: 18 },
 ];
 const impactHeaders: ImpactHeader[] = [
   { label: "Dégradation initiale", value: (result) => result.before.degradedBands.join("+") },
@@ -20,8 +26,14 @@ const impactHeaders: ImpactHeader[] = [
   { label: "Gap PRB Avant", value: (result) => result.gapPrbBefore, numberFormat: "0.000000" },
   { label: "Gap PRB Après", value: (result) => result.gapPrbAfter, numberFormat: "0.000000" },
   { label: "TRD PRB", value: (result) => result.trdPrb, numberFormat: "0.0%" },
-  { label: "IEA Action", value: (result) => result.iea, numberFormat: "0.0%" },
-  { label: "Statut Action", value: (result) => result.actionEffectiveness, width: 28 },
+  { label: "IEA-R Résorption", value: (result) => result.iea, numberFormat: "0.0%" },
+  { label: "Classe IEA-R", value: (result) => result.actionEffectiveness, width: 28 },
+  { label: "IEA-E Évolution", value: (result) => result.ieaEvolution, numberFormat: "0.0%" },
+  { label: "Classe IEA-E", value: (result) => result.evolutionEffectiveness, width: 28 },
+  { label: "Mode pondération IEA-E", value: (result) => result.evolutionWeighting, width: 24 },
+  { label: "Couverture IEA-E", value: (result) => result.evolutionCoverage, width: 18 },
+  { label: "Trafic total IEA-E [MByte]", value: (result) => result.evolutionTrafficTotal, numberFormat: "0.00", width: 24 },
+  { label: "Éligible contribution globale", value: (result) => result.evolutionContributionEligible ? "Oui" : "Non", width: 24 },
   { label: "Statut Dégradation", value: (result) => result.degradationStatus, width: 24 },
   { label: "Conclusion", value: (result) => result.conclusion, width: 44 },
   { label: "Evolution bande dégradée", value: (result) => result.bandMigration, width: 28 },
@@ -75,7 +87,7 @@ function applyImpactColumns(sheet: import("exceljs").Worksheet, headerRow: numbe
   sheet.autoFilter = { from: { row: headerRow, column: 1 }, to: { row: sheet.rowCount, column: firstColumn + impactHeaders.length - 1 } };
 }
 
-function addSummary(workbook: import("exceljs").Workbook, before: SectorSnapshot[], after: SectorSnapshot[], settings: Settings) {
+function addSummary(workbook: import("exceljs").Workbook, before: SectorSnapshot[], after: SectorSnapshot[], settings: Settings, results: SectorImpactResult[]) {
   const existing = workbook.getWorksheet("Synthèse opérationnelle"); if (existing) workbook.removeWorksheet(existing.id);
   const sheet = workbook.addWorksheet("Synthèse opérationnelle", { views: [{ state: "frozen", ySplit: 3, showGridLines: false }] });
   const grouped = new Map<string, SummaryRow>();
@@ -83,7 +95,7 @@ function addSummary(workbook: import("exceljs").Workbook, before: SectorSnapshot
   const rows = [...grouped.values()].sort((a, b) => a.responsibility.localeCompare(b.responsibility));
   const total = rows.reduce((sum, row) => ({ responsibility: "Total", actions: sum.actions + row.actions, normalized: sum.normalized + row.normalized, compromised: sum.compromised + row.compromised, completed: sum.completed + row.completed, persistent: sum.persistent + row.persistent }), { responsibility: "Total", actions: 0, normalized: 0, compromised: 0, completed: 0, persistent: 0 });
   sheet.mergeCells("A1:F1"); const title = sheet.getCell("A1"); title.value = "Synthèse opérationnelle — Qualification finale"; title.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFC90000" } }; title.font = { bold: true, size: 14, color: { argb: "FFFFFFFF" } }; title.alignment = { horizontal: "center", vertical: "middle" }; sheet.getRow(1).height = 25;
-  sheet.getCell("A2").value = `TRD / IEA · Débit ${settings.throughputWeight * 100}% · PRB ${settings.prbWeight * 100}%`;
+  sheet.getCell("A2").value = `IEA-R / IEA-E · Débit ${settings.throughputWeight * 100}% · PRB ${settings.prbWeight * 100}%`;
   const headers = ["Responsabilité", "Nombre d'actions", "Normalisé", "Compromis", "Action réalisée / Persiste", "Persiste"];
   sheet.addRow(headers); const headerRow = sheet.getRow(3); const fills = ["FFC90000", "FFF1F3F5", "FF92D050", "FFD9EFD0", "FFD9D9D9", "FFD9D9D9"];
   headerRow.eachCell((cell, column) => { cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: fills[column - 1] } }; cell.font = column === 1 ? whiteBold : { bold: true, color: { argb: "FF101820" } }; cell.alignment = { horizontal: column === 1 ? "left" : "center", vertical: "middle", wrapText: true }; cell.border = border; });
@@ -95,12 +107,22 @@ function addSummary(workbook: import("exceljs").Workbook, before: SectorSnapshot
   sheet.addRow([]); const subtitleRow = sheet.addRow(["Situation des normalisations et nouvelles apparitions"]); sheet.mergeCells(`A${subtitleRow.number}:D${subtitleRow.number}`); subtitleRow.getCell(1).font = { bold: true, size: 12, color: { argb: "FF244E7C" }, underline: true }; sheet.addRow(["Responsabilité", "Normalisé", "Nouvelle dégradation", "Différence"]); const movementHeader = sheet.getRow(sheet.rowCount); ["FFC90000", "FF92D050", "FFF5C2A3", "FFF1F3F5"].forEach((color, index) => { const cell = movementHeader.getCell(index + 1); cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: color } }; cell.font = index === 0 ? whiteBold : { bold: true }; cell.alignment = { horizontal: index === 0 ? "left" : "center" }; cell.border = border; });
   movementRows.forEach((row) => sheet.addRow([row.responsibility, row.normalized || null, row.newDegradation || null, row.normalized - row.newDegradation])); sheet.addRow(["Total", movementTotal.normalized, movementTotal.newDegradation, movementTotal.normalized - movementTotal.newDegradation]);
   const movementEnd = sheet.rowCount; const movementStart = movementHeader.number + 1; for (let r = movementStart; r <= movementEnd; r++) { const row = sheet.getRow(r); row.eachCell((cell, column) => { cell.border = border; cell.alignment = { horizontal: column === 1 ? "left" : "center" }; if (column === 2) { cell.font = { bold: true, color: { argb: "FF00A651" } }; } if (column === 3 || (column === 4 && Number(cell.value) < 0)) cell.font = { bold: true, color: { argb: "FFE11D26" } }; }); if (r === movementEnd) { row.getCell(1).fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFC90000" } }; row.getCell(1).font = whiteBold; row.getCell(2).fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF92D050" } }; row.getCell(3).fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF5C2A3" } }; } }
+  const contribution = calculateEvolutionContribution(results);
+  sheet.addRow([]); const contributionTitle = sheet.addRow(["Contribution IEA-E par responsabilité"]); sheet.mergeCells(`A${contributionTitle.number}:H${contributionTitle.number}`); contributionTitle.getCell(1).font = { bold: true, size: 12, color: { argb: "FF244E7C" }, underline: true };
+  const globalRow = sheet.addRow(["IEA-E global net", contribution.globalNet ?? null, "Trafic total éligible (MB)", contribution.totalTraffic || null, "Secteurs couverts", contribution.eligibleSectors]);
+  globalRow.eachCell((cell, column) => { cell.border = border; cell.alignment = { horizontal: column % 2 ? "left" : "center" }; if (column === 2) cell.numFmt = "0.0%"; if (column === 4) cell.numFmt = "0.00"; if (column % 2) { cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF1F3F5" } }; cell.font = { bold: true, color: { argb: "FF101820" } }; } });
+  sheet.addRow(["Responsabilité", "Contribution positive brute", "Impact négatif régressions", "Contribution nette", "Trafic couvert (MB)", "Secteurs couverts", "Part améliorations", "Part régressions"]);
+  const contributionHeader = sheet.getRow(sheet.rowCount); contributionHeader.eachCell((cell) => { cell.fill = headerStyle; cell.font = whiteBold; cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true }; cell.border = border; });
+  contribution.rows.forEach((row) => sheet.addRow([row.responsibility, row.positive, row.negative, row.net, row.traffic, row.sectors, row.positiveShare ?? null, row.regressionShare ?? null]));
+  sheet.addRow(["Total / IEA-E global", contribution.rows.reduce((sum, row) => sum + row.positive, 0), contribution.rows.reduce((sum, row) => sum + row.negative, 0), contribution.globalNet ?? null, contribution.totalTraffic || null, contribution.eligibleSectors, contribution.rows.some((row) => row.positiveShare !== undefined) ? 1 : null, contribution.rows.some((row) => row.regressionShare !== undefined) ? 1 : null]);
+  const contributionStart = contributionHeader.number + 1; const contributionEnd = sheet.rowCount;
+  for (let r = contributionStart; r <= contributionEnd; r++) { const row = sheet.getRow(r); row.eachCell((cell, column) => { cell.border = border; cell.alignment = { horizontal: column === 1 ? "left" : "center", vertical: "middle" }; if ([2, 3, 4, 7, 8].includes(column)) cell.numFmt = "0.0%"; if (column === 5) cell.numFmt = "0.00"; }); if (r === contributionEnd) { row.getCell(1).fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFC90000" } }; row.getCell(1).font = whiteBold; row.getCell(4).font = { bold: true, color: { argb: "FF244E7C" } }; } }
   [34, 20, 18, 24, 29, 16].forEach((width, index) => { sheet.getColumn(index + 1).width = width; });
 }
 
 export async function buildExportWorkbook(results: SectorImpactResult[], settings: Settings, source: ArrayBuffer, beforeRecords: SectorSnapshot[], afterRecords: SectorSnapshot[]) {
   const ExcelJS = await import("exceljs"); const workbook = new ExcelJS.Workbook(); await workbook.xlsx.load(source); workbook.creator = "EMA Solution"; workbook.modified = new Date();
-  const { sheet, headerRow, sectorColumn } = findAnalyse(workbook); workbook.worksheets.filter((item) => item.id !== sheet.id).forEach((item) => workbook.removeWorksheet(item.id)); applyImpactColumns(sheet, headerRow, sectorColumn, results); addSummary(workbook, beforeRecords, afterRecords, settings);
+  const { sheet, headerRow, sectorColumn } = findAnalyse(workbook); workbook.worksheets.filter((item) => item.id !== sheet.id).forEach((item) => workbook.removeWorksheet(item.id)); applyImpactColumns(sheet, headerRow, sectorColumn, results); addSummary(workbook, beforeRecords, afterRecords, settings, results);
   return workbook.xlsx.writeBuffer();
 }
 
