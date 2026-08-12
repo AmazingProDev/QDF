@@ -26,6 +26,8 @@ const impactHeaders: ImpactHeader[] = [
   { label: "Conclusion", value: (result) => result.conclusion, width: 44 },
   { label: "Evolution bande dégradée", value: (result) => result.bandMigration, width: 28 },
   ...BANDS.flatMap(bandHeaders),
+  { label: "Source KPI BEFORE", value: (result) => result.baselineSource || "Fichier BEFORE", width: 22 },
+  ...BANDS.map((band) => ({ label: `${band} Traffic référence [MByte]`, value: (result: SectorImpactResult) => result.before.bands[band].traffic, numberFormat: "0.00", width: 24 })),
 ];
 type SummaryRow = { responsibility: string; actions: number; normalized: number; compromised: number; completed: number; persistent: number };
 

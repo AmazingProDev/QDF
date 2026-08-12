@@ -5,5 +5,6 @@ import "./qualification-tables.css";
 import "./filter-overlay.css";
 import "./methodology.css";
 import "./landing-background.css";
+import "./reference-upload.css";
 export const metadata: Metadata = { title: "Network Action Effectiveness Analyzer", description: "TRD / IEA Before vs After KPI Qualification" };
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) { return <html lang="fr"><body>{children}</body></html>; }

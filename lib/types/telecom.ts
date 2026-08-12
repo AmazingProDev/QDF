@@ -1,7 +1,7 @@
 export const BANDS = ["L1800", "L2100", "L2600", "L800"] as const;
 export type Band = (typeof BANDS)[number];
 
-export interface BandKpi { throughput?: number; prb?: number; availability?: number; ta?: number }
+export interface BandKpi { throughput?: number; prb?: number; traffic?: number; availability?: number; ta?: number }
 export interface SectorSnapshot {
   sector: string; originalSector: string; situation?: string; hetsite?: string; dr?: string; plaque?: string; vendor?: string;
   responsibility?: string; action?: string; qualif?: string; degradedBands: Band[]; chargedBands: Band[];
@@ -17,6 +17,7 @@ export interface SectorImpactResult {
   dateAction?: Date; trdThroughput?: number; trdPrb?: number; iea?: number;
   gapDlBefore?: number; gapDlAfter?: number; gapPrbBefore?: number; gapPrbAfter?: number;
   actionEffectiveness: ActionEffectiveness; degradationStatus: string; conclusion: string; confidence: string; bandMigration: string;
+  baselineSource?: "Référence Ookla" | "Fichier BEFORE";
 }
 export type ActionEffectiveness = "Très efficace" | "Efficace" | "Amélioration partielle" | "Impact faible / non significatif" | "Régression" | "Non mesurable";
 export interface Settings { dlThresholds: Record<Band, number>; prbThreshold: number; throughputWeight: number; prbWeight: number; veryEffective: number; effective: number; partial: number; regression: number }

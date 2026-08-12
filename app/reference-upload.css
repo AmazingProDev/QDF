@@ -1,0 +1,6 @@
+.reference-upload { width: min(50%, 620px); margin: 18px auto 0; }
+.reference-upload .upload-card { min-height: 0; }
+
+@media (max-width: 700px) {
+  .reference-upload { width: 100%; }
+}
