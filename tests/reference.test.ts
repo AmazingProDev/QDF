@@ -3,7 +3,7 @@ import { matchAndCalculate } from "@/lib/analysis/matching";
 import { BANDS, defaultSettings, type ParseResult, type SectorSnapshot } from "@/lib/types/telecom";
 
 const snapshot = (sector: string, throughput: number, traffic?: number): SectorSnapshot => ({ sector, originalSector: sector, degradedBands: ["L1800"], chargedBands: [], bands: Object.fromEntries(BANDS.map((band) => [band, { throughput: band === "L1800" ? throughput : 20, prb: 50, traffic: band === "L1800" ? traffic : undefined }])) as SectorSnapshot["bands"] });
-const parsed = (...items: SectorSnapshot[]): ParseResult => ({ records: new Map(items.map((item) => [item.sector, item])), allRecords: items, duplicates: [], rowCount: items.length, sheetName: "Analyse", detectedBands: Object.fromEntries(BANDS.map((band) => [band, { throughput: true, prb: true }])) as ParseResult["detectedBands"] });
+const parsed = (...items: SectorSnapshot[]): ParseResult => ({ records: new Map(items.map((item) => [item.sector, item])), allRecords: items, duplicates: [], rowCount: items.length, sheetName: "Analyse", format: "qualification", detectedBands: Object.fromEntries(BANDS.map((band) => [band, { throughput: true, prb: true }])) as ParseResult["detectedBands"] });
 
 describe("Référence Ookla", () => {
   it("uses the reference KPI and traffic where it is available, otherwise retains BEFORE", () => {
