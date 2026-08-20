@@ -1,4 +1,5 @@
 import { BANDS, type Band, type SectorImpactResult } from "@/lib/types/telecom";
+import { qualificationResponsibility } from "@/lib/analysis/qualification";
 
 export type ResponsibilityContribution = {
   responsibility: string;
@@ -20,7 +21,7 @@ export function calculateEvolutionContribution(results: SectorImpactResult[]) {
   const totalTraffic = eligible.reduce((sum, result) => sum + (result.evolutionTrafficTotal || 0), 0);
   const groups = new Map<string, { traffic: number; sectors: number; positiveRaw: number; negativeRaw: number }>();
   eligible.forEach((result) => {
-    const responsibility = result.after.responsibility?.trim() || "Non renseigné";
+    const responsibility = qualificationResponsibility(result.after.responsibility);
     const group = groups.get(responsibility) || { traffic: 0, sectors: 0, positiveRaw: 0, negativeRaw: 0 };
     const weightedScore = (result.evolutionTrafficTotal || 0) * (result.ieaEvolution || 0);
     group.traffic += result.evolutionTrafficTotal || 0;
