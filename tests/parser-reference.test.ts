@@ -29,4 +29,13 @@ describe("Parser référence Ookla", () => {
     expect(parsedSafi.format).toBe("qualification");
     expect(parsedSafi.records.get("4G_SAFI_S1")).toMatchObject({ situation: "1800+2600+800", responsibility: "Optim", action: "Partage L800", degradedBands: ["L1800"], chargedBands: ["L1800"] });
   });
+
+  it("recognizes the abbreviated Traf Mo header as per-band traffic", async () => {
+    const workbook = new ExcelJS.Workbook(); const sheet = workbook.addWorksheet("Analyse");
+    sheet.addRow(["", "", "L1800", "L1800", "L1800"]);
+    sheet.addRow(["Secteur", "Hetsite", "Traf Mo", "Débit 4G DL", "Usage_PRB_DL_BH"]);
+    sheet.addRow(["4G_Test_S1", "TEST", 19357, 12.89, 37.67]);
+    const parsed = await parseTelecomWorkbook(new File([await workbook.xlsx.writeBuffer()], "before.xlsx"));
+    expect(parsed.records.get("4G_Test_S1")?.bands.L1800.traffic).toBe(19357);
+  });
 });
